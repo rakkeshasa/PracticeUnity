@@ -79,49 +79,58 @@ Quaternion.Slerp: 오브젝트를 부드럽게 회전시키는 함수</br>
 기존에는 Update에서 키입력을 체크해 움직이도록 했으나, Update에서 매번 키입력을 확인하는 것은 부하가 크다고 생각해 입력은 따로 매니저가 관리하도록 했습니다.</br>
 
 ```
+public class Managers : MonoBehaviour
+{
+    static Managers s_instance;
+    static Managers Instance { get { Init(); return s_instance; } }
+
+    InputManager _input = new InputManager();
+    public static InputManager Input { get { return Instance._input; } }
+}
+
+public class PlayerController : BaseController
+{
+    public override void Init()
+    {
+        Managers.Input.MouseAction -= OnMouseEvent;
+        Managers.Input.MouseAction += OnMouseEvent;
+    }
+
+    void OnMouseEvent(Define.MouseEvent evt)
+    {
+        switch(State)
+        {
+            case Define.State.Idle:
+                OnMouseEvent_IdleRun(evt);
+                break;
+            case Define.State.Moving:
+                OnMouseEvent_IdleRun(evt);
+                break;
+            case Define.State.Skill:
+                if (evt == Define.MouseEvent.PointerUp)
+                    _stopSkill = true;
+                break;
+        }
+    }
+}
+
 public class InputManager
 {
-    public Action KeyAction = null;
     public Action<Define.MouseEvent> MouseAction = null;
 
     public void OnUpdate()
     {
-        // UI가 클릭된 상황이라면 리턴
-        if (EventSystem.current == null || EventSystem.current.IsPointerOverGameObject())
-            return;
-
-        if(Input.anyKey && KeyAction != null)
-            KeyAction.Invoke();
-
         if(MouseAction != null)
         {
             if(Input.GetMouseButton(0))
-            {
-                if(!_pressed)
-                {
-                    MouseAction.Invoke(Define.MouseEvent.PointerDown);
-                    _pressedTime = Time.time;
-                }
-                MouseAction.Invoke(Define.MouseEvent.Press);
-                _pressed = true;
-            }
-            else
-            {
-                if (_pressed)
-                {
-                    if(Time.time < _pressedTime + 0.2f)
-                    {
-                        MouseAction.Invoke(Define.MouseEvent.Click);
-                    }
-                    MouseAction.Invoke(Define.MouseEvent.PointerUp);
-                }
-                _pressed = false;
-                _pressedTime = 0;
-            }
+                MouseAction.Invoke(Define.MouseEvent.PointerDown);
         }
     }
 }
 ```
+InputManager는 유일한 Managers에서 생성되고 호출될 수 있도록 했습니다.</br>
+그리고 기존에 입력에 따라 캐릭터의 이동을 처리하던 PlayerController에는 Action을 이용해 입력을 InputManager로 부터 처리할 수 있게 했습니다.</br>
+
 
 ## 메모사항
 
@@ -333,3 +342,18 @@ public class MainClass
 이 경우, Func<int>는 매개변수가 없고 int 값을 반환하는 MyClass.GetNumber 메서드를 참조합니다. </br>
 그리고 Func<int, string>은 하나의 int 매개변수를 받고 string을 반환하는 MyClass.ToString 메서드를 참조합니다.</br>
 따라서 마지막으로 추가된 메서드의 반환 값이 최종적으로 반환됨에 유의해야 합니다.</br>
+
+<strong>Action</strong></br>
+Action은 반환 타입이 void인 메소드를 위해 특별히 설계된 제네릭 델리게이트입니다. </br>
+여러개의 매개변수를 가질 수 있으며 멀티캐스팅이 가능합니다.</br>
+
+```
+
+```
+
+<strong>정리</strong></br>
+- <strong>Delegate</strong>: 특정 메서드 시그니처(입력 매개변수와 반환 타입)와 일치하는 메서드를 참조할 수 있는 타입이다.
+- <strong>Func</strong>: 반환 값이 있는 메서드를 참조하는 제네릭 델리게이트다. 마지막 타입 매개 변수는 반환 타입을 나타내며, 나머지 매개 변수는 입력 매개 변수의 타입이다.
+- <strong>Action</strong>: 반환 값이 없는(void) 메서드를 참조하는 제네릭 델리게이트다. 모든 타입 매개 변수는 입력 매개 변수의 타입을 나타낸다.
+- 모두 멀티캐스팅이 가능하나, 반환값이 있는 Delegate/Func를 여러개 캐스팅한 경우 그 Delegate/Func의 반환값은 멀티캐스팅 시 마지막으로 추가된 메서드의 반환값이 된다.
+

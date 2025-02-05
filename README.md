@@ -106,10 +106,6 @@ public class PlayerController : BaseController
             case Define.State.Moving:
                 OnMouseEvent_IdleRun(evt);
                 break;
-            case Define.State.Skill:
-                if (evt == Define.MouseEvent.PointerUp)
-                    _stopSkill = true;
-                break;
         }
     }
 }
@@ -130,6 +126,7 @@ public class InputManager
 ```
 InputManager는 유일한 Managers에서 생성되고 호출될 수 있도록 했습니다.</br>
 그리고 기존에 입력에 따라 캐릭터의 이동을 처리하던 PlayerController에는 Action을 이용해 입력을 InputManager로 부터 처리할 수 있게 했습니다.</br>
+따라서 마우스 입력이 발생하면 구독을 신청한 OnMouseEvent가 호출되며 OnMouseEvent는 swith문에 따라 상황에 따라 알맞은 행동을 하게 됩니다.</br></br>
 
 
 ## 메모사항

@@ -354,3 +354,19 @@ Action은 반환 타입이 void인 메소드를 위해 특별히 설계된 제�
 - <strong>Action</strong>: 반환 값이 없는(void) 메서드를 참조하는 제네릭 델리게이트다. 모든 타입 매개 변수는 입력 매개 변수의 타입을 나타낸다.
 - 모두 멀티캐스팅이 가능하나, 반환값이 있는 Delegate/Func를 여러개 캐스팅한 경우 그 Delegate/Func의 반환값은 멀티캐스팅 시 마지막으로 추가된 메서드의 반환값이 된다.
 
+### T와 where
+
+```public T Load<T>(string path) where T : Object```
+제너릭 제약자 where: T에 들어갈 수 있는 타입에 조건을 거는 역할</br>
+```where T : Object```라면 T에는 Object타입만 들어갈 수 있다는 뜻</br>
+
+### Instantiate
+게임 오브젝트를 동적으로 생성하는데 사용.</br>
+코드를 통해 원하는 상황이나 위치에 오브젝트를 생성할 수 있으며 일반적으로 프리팹을 생성할 때 자주 사용</br>
+동적으로 생성한다는 것은 프로그램 실행 시 미리 생성하지 않고, 해당 객체가 필요한 순간에 생성함.</br>
+
+```Instantiate(Object origianl, Vector3 position, Quaternion rotation)```
+- original : 생성할 객체(프리펩)
+- position : 생성될 위치
+- rotation : 생성시 회전각
+
